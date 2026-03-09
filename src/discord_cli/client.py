@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import random
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from typing import Any, AsyncGenerator
@@ -51,15 +52,15 @@ async def get_client() -> AsyncGenerator[httpx.AsyncClient, None]:
 
 
 async def _handle_rate_limit(response: httpx.Response) -> None:
-    """Sleep if we hit a rate limit."""
+    """Sleep if we hit a rate limit, with jitter."""
     if response.status_code == 429:
         data = response.json()
         retry_after = data.get("retry_after", 1.0)
-        await asyncio.sleep(retry_after)
+        await asyncio.sleep(retry_after + random.uniform(0.5, 2.0))
     elif remaining := response.headers.get("X-RateLimit-Remaining"):
         if int(remaining) == 0:
             reset_after = float(response.headers.get("X-RateLimit-Reset-After", "1.0"))
-            await asyncio.sleep(reset_after)
+            await asyncio.sleep(reset_after + random.uniform(0.2, 1.0))
 
 
 async def _get(client: httpx.AsyncClient, path: str, **params: Any) -> Any:
@@ -174,8 +175,8 @@ async def fetch_messages(
             # 'before'/default mode: move cursor to the oldest message we've seen
             before = data[-1]["id"]
 
-        # Small delay to be nice
-        await asyncio.sleep(0.5)
+        # Small delay with jitter to be nice
+        await asyncio.sleep(random.uniform(0.3, 1.0))
 
     # Sort by timestamp ascending
     all_messages.sort(key=lambda m: m["msg_id"])

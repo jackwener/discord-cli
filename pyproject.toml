@@ -1,6 +1,6 @@
 [project]
 name = "kabi-discord-cli"
-version = "0.2.2"
+version = "0.2.3"
 description = "Discord CLI — fetch chat history, search messages, daily sync"
 license = "Apache-2.0"
 requires-python = ">=3.10"
