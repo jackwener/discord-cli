@@ -27,8 +27,10 @@ def test_recent_command_supports_json(seeded_db: MessageDB):
 
     assert result.exit_code == 0
     payload = json.loads(result.output)
-    assert [row["msg_id"] for row in payload] == ["100", "101"]
-    assert all(row["channel_name"] == "general" for row in payload)
+    assert payload["ok"] is True
+    rows = payload["data"]
+    assert [row["msg_id"] for row in rows] == ["100", "101"]
+    assert all(row["channel_name"] == "general" for row in rows)
 
 
 def test_recent_command_auto_yaml_when_stdout_is_not_tty(seeded_db: MessageDB, monkeypatch):
@@ -39,7 +41,9 @@ def test_recent_command_auto_yaml_when_stdout_is_not_tty(seeded_db: MessageDB, m
 
     assert result.exit_code == 0
     payload = yaml.safe_load(result.output)
-    assert [row["msg_id"] for row in payload] == ["100", "101"]
+    assert payload["ok"] is True
+    rows = payload["data"]
+    assert [row["msg_id"] for row in rows] == ["100", "101"]
 
 
 def test_timeline_command_supports_json(seeded_db: MessageDB):
@@ -49,8 +53,10 @@ def test_timeline_command_supports_json(seeded_db: MessageDB):
 
     assert result.exit_code == 0
     payload = json.loads(result.output)
-    assert payload
-    assert payload[0]["period"] == "2026-03-10"
+    assert payload["ok"] is True
+    rows = payload["data"]
+    assert rows
+    assert rows[0]["period"] == "2026-03-10"
 
 
 def test_recent_command_rejects_ambiguous_channel(tmp_path, monkeypatch):
