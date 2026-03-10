@@ -1,5 +1,7 @@
 """discord-cli — CLI entry point."""
 
+import logging
+
 import click
 from rich.console import Console
 from rich.table import Table
@@ -29,9 +31,11 @@ def _discord_user_payload(user: dict) -> dict[str, object]:
 
 @click.group()
 @click.version_option(package_name="kabi-discord-cli")
-def cli():
+@click.option("-v", "--verbose", is_flag=True, help="Enable debug logging.")
+def cli(verbose: bool):
     """discord — CLI for fetching Discord chat history and searching messages."""
-    pass
+    level = logging.DEBUG if verbose else logging.WARNING
+    logging.basicConfig(level=level, format="%(name)s: %(message)s")
 
 
 @cli.command("auth")
