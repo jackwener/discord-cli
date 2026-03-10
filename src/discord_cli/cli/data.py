@@ -9,6 +9,7 @@ from rich.console import Console
 import yaml
 
 from ._channels import resolve_channel_id_or_raise
+from ._output import default_structured_format, error_payload
 from ..db import MessageDB
 
 console = Console(stderr=True)
@@ -32,6 +33,16 @@ def export(channel: str, fmt: str, output_file: str | None, hours: int | None):
         msgs = db.get_recent(channel_id=channel_id, hours=hours, limit=100000)
 
     if not msgs:
+        structured_fmt = fmt if fmt in {"json", "yaml"} else default_structured_format(as_json=False, as_yaml=False)
+        if structured_fmt in {"json", "yaml"} and output_file is None:
+            click.echo(
+                (
+                    json.dumps(error_payload("no_messages", f"No messages found for '{channel}'."), ensure_ascii=False, indent=2, default=str)
+                    if structured_fmt == "json"
+                    else yaml.safe_dump(error_payload("no_messages", f"No messages found for '{channel}'."), allow_unicode=True, sort_keys=False, default_flow_style=False)
+                )
+            )
+            raise SystemExit(1) from None
         console.print(f"[yellow]No messages found for '{channel}'.[/yellow]")
         return
 

@@ -19,7 +19,7 @@ from ..client import (
     search_guild_messages,
 )
 from ..db import MessageDB
-from ._output import emit_structured, structured_output_options
+from ._output import emit_error, emit_structured, structured_output_options
 
 console = Console(stderr=True)
 
@@ -129,6 +129,8 @@ def dc_channels(guild: str, as_json: bool, as_yaml: bool):
         async with get_client() as client:
             guild_id = await resolve_guild_id(client, guild)
             if not guild_id:
+                if emit_error("guild_not_found", f"Guild '{guild}' not found.", as_json=as_json, as_yaml=as_yaml):
+                    raise SystemExit(1) from None
                 console.print(f"[red]Guild '{guild}' not found.[/red]")
                 return []
             return await list_channels(client, guild_id)
@@ -318,6 +320,8 @@ def dc_sync_all(limit: int):
                         )
 
                 if not channels:
+                    if emit_error("no_channels", "No text channels found for this account."):
+                        return {}
                     console.print("[yellow]No text channels found for this account.[/yellow]")
                     return {}
 
@@ -364,6 +368,8 @@ def dc_search(guild: str, keyword: str, channel: str | None, limit: int, as_json
         async with get_client() as client:
             guild_id = await resolve_guild_id(client, guild)
             if not guild_id:
+                if emit_error("guild_not_found", f"Guild '{guild}' not found.", as_json=as_json, as_yaml=as_yaml):
+                    raise SystemExit(1) from None
                 console.print(f"[red]Guild '{guild}' not found.[/red]")
                 return []
             return await search_guild_messages(client, guild_id, keyword, channel_id=channel, limit=limit)
@@ -371,6 +377,8 @@ def dc_search(guild: str, keyword: str, channel: str | None, limit: int, as_json
     results = asyncio.run(_run())
 
     if not results:
+        if emit_structured([], as_json=as_json, as_yaml=as_yaml):
+            return
         console.print("[yellow]No messages found.[/yellow]")
         return
 
@@ -397,6 +405,8 @@ def dc_members(guild: str, limit: int, as_json: bool, as_yaml: bool):
         async with get_client() as client:
             guild_id = await resolve_guild_id(client, guild)
             if not guild_id:
+                if emit_error("guild_not_found", f"Guild '{guild}' not found.", as_json=as_json, as_yaml=as_yaml):
+                    raise SystemExit(1) from None
                 console.print(f"[red]Guild '{guild}' not found.[/red]")
                 return []
             return await list_members(client, guild_id, limit=limit)
@@ -404,6 +414,8 @@ def dc_members(guild: str, limit: int, as_json: bool, as_yaml: bool):
     members = asyncio.run(_run())
 
     if not members:
+        if emit_structured([], as_json=as_json, as_yaml=as_yaml):
+            return
         console.print("[yellow]No members found (may require Privileged Intents).[/yellow]")
         return
 
@@ -440,6 +452,8 @@ def dc_info(guild: str, as_json: bool, as_yaml: bool):
         async with get_client() as client:
             guild_id = await resolve_guild_id(client, guild)
             if not guild_id:
+                if emit_error("guild_not_found", f"Could not find guild: {guild}", as_json=as_json, as_yaml=as_yaml):
+                    raise SystemExit(1) from None
                 return None
             return await get_guild_info(client, guild_id)
 

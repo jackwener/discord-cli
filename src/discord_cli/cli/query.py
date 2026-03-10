@@ -30,11 +30,13 @@ def search(keyword: str, channel: str | None, limit: int, as_json: bool, as_yaml
         channel_id = resolve_channel_id_or_raise(db, channel) if channel else None
         results = db.search(keyword, channel_id=channel_id, limit=limit)
 
-    if not results:
-        console.print("[yellow]No messages found.[/yellow]")
+    if results and emit_structured(results, as_json=as_json, as_yaml=as_yaml):
         return
 
-    if emit_structured(results, as_json=as_json, as_yaml=as_yaml):
+    if not results:
+        if emit_structured([], as_json=as_json, as_yaml=as_yaml):
+            return
+        console.print("[yellow]No messages found.[/yellow]")
         return
 
     for msg in results:
@@ -61,11 +63,13 @@ def recent(channel: str | None, hours: int | None, limit: int, as_json: bool, as
         channel_id = resolve_channel_id_or_raise(db, channel) if channel else None
         results = db.get_latest(channel_id=channel_id, hours=hours, limit=limit)
 
-    if not results:
-        console.print("[yellow]No recent messages found.[/yellow]")
+    if results and emit_structured(results, as_json=as_json, as_yaml=as_yaml):
         return
 
-    if emit_structured(results, as_json=as_json, as_yaml=as_yaml):
+    if not results:
+        if emit_structured([], as_json=as_json, as_yaml=as_yaml):
+            return
+        console.print("[yellow]No recent messages found.[/yellow]")
         return
 
     show_channel = channel_id is None
@@ -123,11 +127,13 @@ def today(channel: str | None, as_json: bool, as_yaml: bool):
         channel_id = resolve_channel_id_or_raise(db, channel) if channel else None
         msgs = db.get_today(channel_id=channel_id)
 
-    if not msgs:
-        console.print("[yellow]No messages today.[/yellow]")
+    if msgs and emit_structured(msgs, as_json=as_json, as_yaml=as_yaml):
         return
 
-    if emit_structured(msgs, as_json=as_json, as_yaml=as_yaml):
+    if not msgs:
+        if emit_structured([], as_json=as_json, as_yaml=as_yaml):
+            return
+        console.print("[yellow]No messages today.[/yellow]")
         return
 
     grouped: dict[str, list[dict]] = defaultdict(list)
@@ -159,11 +165,13 @@ def top(channel: str | None, hours: int | None, limit: int, as_json: bool, as_ya
         channel_id = resolve_channel_id_or_raise(db, channel) if channel else None
         results = db.top_senders(channel_id=channel_id, hours=hours, limit=limit)
 
-    if not results:
-        console.print("[yellow]No sender data found.[/yellow]")
+    if results and emit_structured(results, as_json=as_json, as_yaml=as_yaml):
         return
 
-    if emit_structured(results, as_json=as_json, as_yaml=as_yaml):
+    if not results:
+        if emit_structured([], as_json=as_json, as_yaml=as_yaml):
+            return
+        console.print("[yellow]No sender data found.[/yellow]")
         return
 
     table = Table(title="Top Senders")
@@ -196,11 +204,13 @@ def timeline(channel: str | None, hours: int | None, granularity: str, as_json: 
         channel_id = resolve_channel_id_or_raise(db, channel) if channel else None
         results = db.timeline(channel_id=channel_id, hours=hours, granularity=granularity)
 
-    if not results:
-        console.print("[yellow]No timeline data.[/yellow]")
+    if results and emit_structured(results, as_json=as_json, as_yaml=as_yaml):
         return
 
-    if emit_structured(results, as_json=as_json, as_yaml=as_yaml):
+    if not results:
+        if emit_structured([], as_json=as_json, as_yaml=as_yaml):
+            return
+        console.print("[yellow]No timeline data.[/yellow]")
         return
 
     max_count = max(r["msg_count"] for r in results)

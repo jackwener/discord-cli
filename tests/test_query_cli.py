@@ -97,6 +97,47 @@ def test_recent_command_rejects_ambiguous_channel(tmp_path, monkeypatch):
     assert "ambiguous" in result.output
 
 
+def test_recent_command_rejects_ambiguous_channel_yaml(tmp_path, monkeypatch):
+    monkeypatch.setenv("DB_PATH", str(tmp_path / "messages.db"))
+    monkeypatch.setenv("OUTPUT", "auto")
+
+    with MessageDB() as db:
+        db.insert_batch(
+            [
+                {
+                    "msg_id": "1",
+                    "channel_id": "c-general",
+                    "channel_name": "general",
+                    "guild_id": "g-1",
+                    "guild_name": "Dev",
+                    "sender_id": "u-1",
+                    "sender_name": "Alice",
+                    "content": "hello",
+                    "timestamp": "2026-03-10T01:00:00+00:00",
+                },
+                {
+                    "msg_id": "2",
+                    "channel_id": "c-general-chat",
+                    "channel_name": "general-chat",
+                    "guild_id": "g-1",
+                    "guild_name": "Dev",
+                    "sender_id": "u-2",
+                    "sender_name": "Bob",
+                    "content": "world",
+                    "timestamp": "2026-03-10T02:00:00+00:00",
+                },
+            ]
+        )
+
+    runner = CliRunner()
+    result = runner.invoke(cli, ["recent", "-c", "gen", "--yaml"])
+
+    assert result.exit_code != 0
+    payload = yaml.safe_load(result.output)
+    assert payload["ok"] is False
+    assert payload["error"]["code"] == "channel_resolution_error"
+
+
 def test_status_auto_yaml_when_stdout_is_not_tty(monkeypatch):
     monkeypatch.setenv("OUTPUT", "auto")
     monkeypatch.setenv("DISCORD_TOKEN", "token")

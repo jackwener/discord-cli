@@ -95,3 +95,25 @@ def _normalize_success_payload(data: Any) -> Any:
     if isinstance(data, dict) and data.get("schema_version") == _SCHEMA_VERSION and "ok" in data:
         return data
     return success_payload(data)
+
+
+def emit_error(
+    code: str,
+    message: str,
+    *,
+    as_json: bool | None = None,
+    as_yaml: bool | None = None,
+    details: Any | None = None,
+) -> bool:
+    """Emit a structured error when the active output mode is machine-readable."""
+    if as_json is None or as_yaml is None:
+        ctx = click.get_current_context(silent=True)
+        params = ctx.params if ctx is not None else {}
+        as_json = bool(params.get("as_json", False)) if as_json is None else as_json
+        as_yaml = bool(params.get("as_yaml", False)) if as_yaml is None else as_yaml
+
+    fmt = default_structured_format(as_json=bool(as_json), as_yaml=bool(as_yaml))
+    if fmt is None:
+        return False
+    click.echo(dump_structured(error_payload(code, message, details=details), fmt=fmt))
+    return True
