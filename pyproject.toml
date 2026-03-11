@@ -1,6 +1,6 @@
 [project]
 name = "kabi-discord-cli"
-version = "0.2.6"
+version = "0.2.7"
 description = "Discord CLI for local-first sync, search, export, and agent-friendly retrieval"
 readme = "README.md"
 license = "Apache-2.0"
