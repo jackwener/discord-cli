@@ -48,6 +48,15 @@ cd discord-cli
 uv sync --extra dev
 ```
 
+Upgrade to the latest version:
+
+```bash
+uv tool upgrade kabi-discord-cli
+# Or: pipx upgrade kabi-discord-cli
+```
+
+> **Tip:** Upgrade regularly to avoid unexpected errors from outdated API handling.
+
 AI commands require the optional `ai` extra plus `ANTHROPIC_API_KEY`.
 
 ## Quick Start

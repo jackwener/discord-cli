@@ -34,6 +34,10 @@ When you need machine-readable output:
 # Install
 uv tool install kabi-discord-cli
 # Or: pipx install kabi-discord-cli
+
+# Upgrade to latest (recommended to avoid API errors)
+uv tool upgrade kabi-discord-cli
+# Or: pipx upgrade kabi-discord-cli
 ```
 
 - Token configured via `discord auth --save`
